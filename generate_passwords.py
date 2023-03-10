@@ -5,7 +5,7 @@ import string
 
 # Define the input and output file paths
 input_file = 'data_berka/client.asc'
-output_file = 'client_with_password.asc'
+output_file = 'data_berka/client_with_password.asc'
 
 # Define the salt string to use for password hashing
 salt = b'$2b$12$gNzgdEMmLsg826uziTfgO.'

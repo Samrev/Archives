@@ -12,7 +12,7 @@ salt = b'$2b$12$gNzgdEMmLsg826uziTfgO.'
 
 # Define the length of the random password
 password_length = 60
-
+random.seed(0)	# to maintain consistency
 # Open the input ASC file and read the records
 with open(input_file, 'r') as f_in, open(output_file, 'w', newline='') as f_out:
     reader = csv.DictReader(f_in, delimiter=';')

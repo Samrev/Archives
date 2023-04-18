@@ -24,7 +24,8 @@ Each account has both static characteristics (e.g. date of creation, address of 
 account_id  - identification of the account
 district_id	- location of the branch	
 date	    -     date of creating of the account	in the form YYMMDD
-frequency	- frequency of issuance of statements	"POPLATEK MESICNE" stands for monthly issuance
+frequency	- frequency of issuance of statements	
+			  "POPLATEK MESICNE" stands for monthly issuance
 			  "POPLATEK TYDNE" stands for weekly issuance
 			  "POPLATEK PO OBRATU" stands for issuance after transaction
 -----------------------------------------------------------------------------------

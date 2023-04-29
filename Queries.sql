@@ -345,3 +345,13 @@ WHERE operation = 'VYBER KARTOU'
 SELECT Client.district_id,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16
 FROM Client JOIN Demography ON (Client.district_id = Demography.district_id)
 WHERE client_id = :client_id;
+
+--30--
+--This query gives all details about a client_id 
+SELECT A2 as district_name, 
+       CASE WHEN LENGTH(birth_number>6) THEN CONCAT('19', SUBSTR(birth_number, 1, 2), '-', SUBSTR(birth_number, 3, 2), '-', SUBSTR(birth_number, 8, 2)) 
+            ELSE CONCAT('19', SUBSTR(birth_number, 1, 2), '-', SUBSTR(birth_number, 3, 2), '-', SUBSTR(birth_number, 5, 2)) 
+       END AS birth_date, 
+       CASE WHEN LENGTH(birth_number>6) THEN 'Female' ELSE 'Male' END AS gender 
+FROM Client JOIN Demography ON (Client.district_id = Demography.district_id)
+WHERE client_id = :client_id;

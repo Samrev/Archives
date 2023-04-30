@@ -94,7 +94,7 @@ WITH client_transactions AS (
   FROM 
     Transaction t
     JOIN Disposition d ON t.account_id = d.account_id
-    RIGHT JOIN Client c ON d.client_id = c.client_id
+    JOIN Client c ON d.client_id = c.client_id
   WHERE 
     c.client_id = :client_id
   GROUP BY 
@@ -103,13 +103,13 @@ WITH client_transactions AS (
 client_loans AS (
   SELECT 
     l.account_id,
-    (CASE WHEN l.account_id is NOT NULL THEN COUNT(*) ELSE 0 END) AS loan_count,
-    SUM(CASE WHEN (l.account_id is NULL OR l.status = 'A' OR l.status = 'C') 
+    COUNT(*) AS loan_count,
+    SUM(CASE WHEN l.status = 'A' OR l.status = 'C' 
     	THEN 0 ELSE 1 END) AS defaulted_loans
   FROM 
     Loan l
     JOIN Disposition d ON l.account_id = d.account_id
-    RIGHT JOIN Client c ON d.client_id = c.client_id
+    JOIN Client c ON d.client_id = c.client_id
   WHERE 
     c.client_id = :client_id
   GROUP BY 
@@ -118,11 +118,10 @@ client_loans AS (
 SELECT 
   ct.total_credit,
   ct.total_debit,
-  ct.transaction_count,
-  cl.loan_count,
-  cl.defaulted_loans,
-  ct.account_id,
-  cl.account_id,
+  CASE WHEN ct.transaction_count IS NOT NULL THEN ct.transaction_count ELSE 0 END AS transaction_count,
+  CASE WHEN cl.loan_count IS NOT NULL THEN cl.loan_count ELSE 0 END AS loan_count,
+  CASE WHEN cl.defaulted_loans IS NOT NULL THEN cl.defaulted_loans ELSE 0 END as defaulted_loans,
+  CASE WHEN ct.account_id IS NOT NULL THEN ct.account_id ELSE cl.account_id END,
   CASE 
     WHEN cl.defaulted_loans > 0 THEN 'High Risk'
     WHEN ct.total_debit > ct.total_credit THEN 'High Risk'
@@ -231,7 +230,10 @@ COMMIT;
 --This query will list all the account linked with a particular bank
 
 SELECT Account.account_id, Account.frequency,Account.date,Client.client_id,
-Client.birth_number,Client.district_id, Disposition.type 
+	   CASE WHEN LENGTH(birth_number)>6 THEN CONCAT('19', SUBSTR(birth_number, 1, 2), '-', SUBSTR(birth_number, 3, 2), '-', SUBSTR(birth_number, 8, 2)) 
+            ELSE CONCAT('19', SUBSTR(birth_number, 1, 2), '-', SUBSTR(birth_number, 3, 2), '-', SUBSTR(birth_number, 5, 2)) 
+       END AS birth_date, 
+       CASE WHEN LENGTH(birth_number)>6 THEN 'Female' ELSE 'Male' END AS gender ,Client.district_id, Disposition.type 
 FROM Account
 JOIN Disposition ON Account.account_id = Disposition.account_id
 JOIN Client ON Disposition.client_id = Client.client_id
@@ -349,9 +351,9 @@ WHERE client_id = :client_id;
 --30--
 --This query gives all details about a client_id 
 SELECT A2 as district_name, 
-       CASE WHEN LENGTH(birth_number>6) THEN CONCAT('19', SUBSTR(birth_number, 1, 2), '-', SUBSTR(birth_number, 3, 2), '-', SUBSTR(birth_number, 8, 2)) 
+       CASE WHEN LENGTH(birth_number)>6 THEN CONCAT('19', SUBSTR(birth_number, 1, 2), '-', SUBSTR(birth_number, 3, 2), '-', SUBSTR(birth_number, 8, 2)) 
             ELSE CONCAT('19', SUBSTR(birth_number, 1, 2), '-', SUBSTR(birth_number, 3, 2), '-', SUBSTR(birth_number, 5, 2)) 
        END AS birth_date, 
-       CASE WHEN LENGTH(birth_number>6) THEN 'Female' ELSE 'Male' END AS gender 
+       CASE WHEN LENGTH(birth_number)>6 THEN 'Female' ELSE 'Male' END AS gender 
 FROM Client JOIN Demography ON (Client.district_id = Demography.district_id)
 WHERE client_id = :client_id;
